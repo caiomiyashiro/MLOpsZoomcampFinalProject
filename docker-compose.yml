@@ -1,0 +1,111 @@
+volumes:
+  grafana_data: {}
+
+networks:
+  front-tier:
+  back-tier:
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    networks:
+      - back-tier
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - back-tier
+      - front-tier
+
+  mlflow:
+    build:
+      context: mlflow
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
+    networks:
+      - back-tier
+    ports:
+      - "5001:5001"
+    entrypoint: mlflow server -h 127.0.0.1 -p 5001 --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB} --default-artifact-root wasbs://vm-container@cm37mlopsproject.blob.core.windows.net
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  # grafana:
+  #   image: grafana/grafana
+  #   user: "472"
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - back-tier
+  #     - front-tier
+  #   restart: always
+
+  # evidently_service:
+  #   build:
+  #     context: evidently_grafana_monitoring_service
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     - grafana
+  #   ports:
+  #     - "8085:8085"
+  #   networks:
+  #     - back-tier
+  #     - front-tier
+
+  # realdatasim:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   networks:
+  #     - back-tier
+  #   ports:
+  #     - "8000:8000"
+  #   restart: no
+
+  # batchdatasim:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   networks:
+  #     - back-tier
+  #   ports:
+  #     - "8000:8000"
+  #   restart: no
+
+  # prometheus:
+  #   image: prom/prometheus
+  #   volumes:
+  #     - ./prometheus/:/etc/prometheus/
+  #     - ./prometheus_data:/prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #     - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+  #     - '--web.console.templates=/usr/share/prometheus/consoles'
+  #   ports:
+  #     - 9090:9090
+  #   networks:
+  #     - back-tier
+  #     - front-tier
+  #   restart: unless-stopped

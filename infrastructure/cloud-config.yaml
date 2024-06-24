@@ -1,11 +1,24 @@
 #cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - curl
+  - apt-transport-https
+  - lsb-release
+  - gnupg
+  - wget
 runcmd:
+  - curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc.gpg > /dev/null
+  - AZ_REPO=$(lsb_release -cs)
+  - echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
   - sudo apt-get update -y
-  - sudo apt-get install docker.io -y
-  - sudo apt-get install docker-compose -y
+  - sudo apt-get install docker.io azure-cli docker-compose -y
   - sudo systemctl start docker
   - sudo systemctl enable docker
   - wget https://repo.anaconda.com/archive/Anaconda3-2024.02-1-Linux-x86_64.sh
-  - bash Anaconda3-2024.02-1-Linux-x86_64.sh -b
-  - echo 'export PATH=\"/home/azureuser/anaconda3/bin:$PATH\"' >> ~/.bashrc
-  - source ~/.bashrc
+  - bash Anaconda3-2024.02-1-Linux-x86_64.sh -b -p /opt/anaconda3
+  - echo 'export PATH=/opt/anaconda3/bin:$PATH' >> /home/azureuser/.bashrc
+  - az login --identity --allow-no-subscriptions
+  - connection_string=$(az keyvault secret show --name storage-connection-string --vault-name mlopsproject-kv --query value -o tsv)
+  - echo 'export AZURE_STORAGE_CONNECTION_STRING='\'$connection_string\' >> /home/azureuser/.bashrc
+  - source /home/azureuser/.bashrc

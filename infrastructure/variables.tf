@@ -1,23 +1,7 @@
-variable "subscription_id" {
-  description = "The Subscription ID for the Azure account"
-  type        = string
-}
-
-variable "client_id" {
-  description = "The Client ID for the Azure Service Principal"
-  type        = string
-  sensitive   = true
-}
-
-variable "client_secret" {
-  description = "The Client Secret for the Azure Service Principal"
-  type        = string
-  sensitive   = true
-}
-
-variable "tenant_id" {
-  description = "The Tenant ID for the Azure Service Principal"
-  type        = string
+variable "azure_credentials" {
+    description = "The Azure credentials. Made of subscription_id, client_id, client_secret, and tenant_id."
+    type        = map
+    sensitive   = true
 }
 
 variable "resource_group_name" {
@@ -42,4 +26,10 @@ variable "postgres_login_credentials" {
     description = "The login credentials for the PostgreSQL database"
     type        = map
     sensitive   = true
+}
+
+variable "cloud_config_file_path" {
+  description = "The path to the cloud-config.yaml file"
+  type        = string
+  default     = "/Users/caiomiyashiro/repo/Personal/MLOpsZoomcampFinalProject/infrastructure/cloud-config.yaml"
 }

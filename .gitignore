@@ -1,12 +1,10 @@
 .ipynb_checkpoints/
 .DS_Store
-*/mlartifacts/*
+mlartifacts/
 mlruns/
 *.parquet
 *.bin
 *.pkl
-03-orchestration/mlops/
-03-orchestration/homework_03/.file_versions/
 *__pycache__*
 *.pickle
 local.settings.json
@@ -20,9 +18,10 @@ keys_test_private.txt
 */data/*
 datasets/
 prometheus_data/*
-terraform.tfvars
 .env
 */mlflow_data/*
 .pytest_cache/
 .terraform/
+terraform.tfvars
 terraform.tfstate.backup
+terraform.tfstate

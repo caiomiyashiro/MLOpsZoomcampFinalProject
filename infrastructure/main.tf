@@ -8,12 +8,14 @@ terraform {
 }
 
 provider "azurerm" {
-    subscription_id = var.subscription_id
-    client_id       = var.client_id
-    client_secret   = var.client_secret
-    tenant_id       = var.tenant_id
+    subscription_id = var.azure_credentials["subscription_id"]
+    client_id       = var.azure_credentials["client_id"]
+    client_secret   = var.azure_credentials["client_secret"]
+    tenant_id       = var.azure_credentials["tenant_id"]
     features        {}
 }
+
+data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "mlopsproject"{ # name of the resource to be referenced in terraform
     name     = var.resource_group_name            # Name of the resource group
@@ -36,6 +38,48 @@ resource "azurerm_storage_container" "vm_storage_container" {
   container_access_type = "private"
 }
 
+resource "azurerm_key_vault" "kv" {
+  name                        = "mlopsproject-kv"
+  location                    = azurerm_resource_group.mlopsproject.location
+  resource_group_name         = azurerm_resource_group.mlopsproject.name
+  tenant_id                   = var.azure_credentials["tenant_id"]
+  sku_name                    = "standard"
+}
+
+resource "azurerm_key_vault_access_policy" "terraform_policy" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  secret_permissions = [
+    "Get", "List", "Set", "Delete", "Purge"
+  ]
+}
+
+resource "azurerm_key_vault_secret" "storage_connection_string" {
+  name         = "storage-connection-string"
+  value        = azurerm_storage_account.mlopsproject.primary_connection_string
+  key_vault_id = azurerm_key_vault.kv.id
+
+  depends_on = [azurerm_key_vault_access_policy.terraform_policy]
+}
+
+resource "azurerm_user_assigned_identity" "uai" {
+  resource_group_name = azurerm_resource_group.mlopsproject.name
+  location            = azurerm_resource_group.mlopsproject.location
+  name                = "kv-identity"
+}
+
+resource "azurerm_key_vault_access_policy" "access_kv_policy" {
+  key_vault_id = azurerm_key_vault.kv.id
+  tenant_id    = var.azure_credentials["tenant_id"]
+  object_id    = azurerm_user_assigned_identity.uai.principal_id
+
+  secret_permissions = [
+    "Get", "List"
+  ]
+}
+
 resource "azurerm_network_security_group" "net_sec_group" {
   name                = "net-sec-group"
   location            = azurerm_resource_group.mlopsproject.location
@@ -49,18 +93,6 @@ resource "azurerm_network_security_group" "net_sec_group" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  security_rule {
-    name                       = "PostgreSQL"
-    priority                   = 1002
-    direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "5432"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
@@ -119,11 +151,12 @@ data "cloudinit_config" "config" {
     filename     = "cloud-config.yaml"
     content_type = "text/cloud-config"
 
-    content = file("/Users/caiomiyashiro/repo/Personal/MLOpsZoomcampFinalProject/infrastructure/cloud-config.yaml")
+    content = file(var.cloud_config_file_path)
   }
 }
 
 resource "azurerm_linux_virtual_machine" "vm" {
+
   name                  = "vm"
   location              = azurerm_resource_group.mlopsproject.location
   resource_group_name   = azurerm_resource_group.mlopsproject.name
@@ -131,11 +164,15 @@ resource "azurerm_linux_virtual_machine" "vm" {
   network_interface_ids = [azurerm_network_interface.vm_net_interface.id]
   size                  = "Standard_B2ms"
 
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.uai.id]
+  }
+
   custom_data = data.cloudinit_config.config.rendered
 
   admin_ssh_key {
     username   = var.vm_login_credentials["username"]
-    #public_key = file("~/.ssh/id_rsa.pub")
      public_key = tls_private_key.vm_ssh.public_key_openssh
   }
 
@@ -152,43 +189,4 @@ resource "azurerm_linux_virtual_machine" "vm" {
     version   = "latest"
   }
 
-}
-
-resource "azurerm_postgresql_server" "postgres_server" {
-  name                = "cm37-postgresql-server"
-  location            = azurerm_resource_group.mlopsproject.location
-  resource_group_name = azurerm_resource_group.mlopsproject.name
-  public_network_access_enabled = true
-
-  # zone                = "1"  # Primary server zone
-
-  administrator_login           = var.postgres_login_credentials["username"]
-  administrator_login_password  = var.postgres_login_credentials["password"]
-
-  sku_name                      = "B_Gen5_1"
-  version                       = "11"
-  storage_mb                    = 32768
-  backup_retention_days         = 7
-  geo_redundant_backup_enabled  = false
-
-  # Disable SSL enforcement
-  ssl_enforcement_enabled       = false
-  ssl_minimal_tls_version_enforced = "TLSEnforcementDisabled"
-}
-
-resource "azurerm_postgresql_firewall_rule" "postgres_fwr_allow_vm_ip" {
-  name                = "allow-vm-ip"
-  resource_group_name = azurerm_resource_group.mlopsproject.name
-  server_name         = azurerm_postgresql_server.postgres_server.name
-  start_ip_address    = azurerm_public_ip.vm_public_ip.ip_address
-  end_ip_address      = azurerm_public_ip.vm_public_ip.ip_address
-}
-
-
-resource "azurerm_postgresql_database" "mlflow" {
-  name      = "mlflow"
-  resource_group_name = azurerm_resource_group.mlopsproject.name
-  server_name = azurerm_postgresql_server.postgres_server.name
-  collation = "en_US.utf8"
-  charset   = "utf8"
 }
