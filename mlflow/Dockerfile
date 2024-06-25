@@ -11,3 +11,9 @@ COPY ["requirements.txt", "./"]
 RUN pip install  -r requirements.txt
 
 EXPOSE 5001
+
+ENTRYPOINT mlflow server \
+            --host=0.0.0.0 \
+            --port=5001 \
+            --backend-store-uri=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB} \
+            --default-artifact-root=wasbs://vm-container@cm37mlopsproject.blob.core.windows.net

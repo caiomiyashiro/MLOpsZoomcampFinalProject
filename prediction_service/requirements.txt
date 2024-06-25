@@ -1,0 +1,8 @@
+scikit-learn~=1.3.0 # because of sklearn
+pandas
+flask
+gunicorn
+python-dotenv
+mlflow
+azure-identity
+azure-storage-blob

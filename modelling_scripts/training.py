@@ -1,7 +1,7 @@
 # pylint: disable=invalid-name,missing-module-docstring
 
 import os
-from typing import Tuple
+import sys
 
 import numpy as np
 import pandas as pd
@@ -10,47 +10,27 @@ from hyperopt import STATUS_OK, Trials, fmin, hp, tpe
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
-from ucimlrepo import fetch_ucirepo
 
 import mlflow
+from utils.dataset import get_dataset_ucirepo
+
+# adding parent folder to sys.path to use utils folder functions
+root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(root_dir)
+
 
 dotenv_path = find_dotenv(filename=".env", raise_error_if_not_found=True, usecwd=True)
-load_dotenv(dotenv_path)  # Load variables from .env file
+load_dotenv(dotenv_path, override=True)  # Load variables from .env file
 
 EXPERIMENT_NAME = os.environ.get(
     "EXPERIMENT_NAME", "wine_quality_hyperparameter_optimization_"
 )
-TRACKING_URL = os.environ.get("TRACKING_URL", "http://localhost:5001")
+TRACKING_URL = os.environ.get("TRACKING_URL", "http://127.0.0.1:5001")
 # print(TRACKING_URL)
 
 mlflow.set_tracking_uri(TRACKING_URL)
 mlflow.set_experiment(EXPERIMENT_NAME)
 mlflow.sklearn.autolog()
-
-with mlflow.start_run():
-    print(mlflow.get_registry_uri())
-    print(mlflow.get_tracking_uri())
-    print(mlflow.get_artifact_uri())
-
-
-def get_dataset_ucirepo(repo_id: int = 186) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """
-    Fetches the dataset from the UCI repository and returns it as pandas dataframes.
-    Parameters:
-        id (int): The ID of the dataset to fetch from the UCI repository.
-    Returns:
-        X (pd.DataFrame): The features of the dataset.
-        y (pd.DataFrame): The targets of the dataset.
-    """
-
-    # fetch dataset
-    dataset = fetch_ucirepo(id=repo_id)
-
-    # data (as pandas dataframes)
-    X = dataset.data.features
-    y = dataset.data.targets
-
-    return X, y
 
 
 def train_model(
@@ -107,19 +87,7 @@ def train_model(
 
     # Perform hyperparameter optimization
     trials = Trials()
-    _ = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=50, trials=trials)
-
-    # best_params = {
-    #     'max_depth': int(best['max_depth']),
-    #     'min_samples_split': best['min_samples_split'],
-    #     'min_samples_leaf': best['min_samples_leaf']
-    # }
-
-    # # Train the final model
-    # final_model = DecisionTreeRegressor(**best_params)
-    # X = pd.concat([X_train, X_val])
-    # y = pd.concat([y_train, y_val])
-    # final_model.fit(X, y)
+    _ = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=10, trials=trials)
 
 
 def main():

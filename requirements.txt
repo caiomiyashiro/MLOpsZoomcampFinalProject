@@ -3,7 +3,6 @@ pandas
 flask
 numpy==1.26.4 # because of evidently
 gunicorn
-ucimlrepo
 jupyter
 ipykernel
 evidently
@@ -11,10 +10,12 @@ hyperopt
 mlflow
 psycopg2-binary
 azure-identity
+azure-storage-blob
 seaborn
 isort
 black
 pylint
 pytest
 pre-commit
-dotenv
+python-dotenv
+ucimlrepo
