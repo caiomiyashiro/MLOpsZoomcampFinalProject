@@ -25,3 +25,4 @@ prometheus_data/*
 terraform.tfvars
 terraform.tfstate.backup
 terraform.tfstate
+terraform.tfstate1
