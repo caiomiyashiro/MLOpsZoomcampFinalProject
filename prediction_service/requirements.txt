@@ -6,3 +6,5 @@ python-dotenv
 mlflow
 azure-identity
 azure-storage-blob
+psutil
+prometheus_client

@@ -1,10 +1,12 @@
 # pylint: disable=invalid-name,missing-module-docstring
+import functools
 from typing import Tuple
 
 import pandas as pd
 from ucimlrepo import fetch_ucirepo
 
 
+@functools.lru_cache(maxsize=128)
 def get_dataset_ucirepo(repo_id: int = 186) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Fetches the dataset from the UCI repository and returns it as pandas dataframes.

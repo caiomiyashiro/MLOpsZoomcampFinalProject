@@ -1,6 +1,5 @@
 # pylint: disable=invalid-name,missing-module-docstring
 import json
-import logging
 import os
 
 # from utils.system_metrics import get_system_metrics
@@ -19,12 +18,6 @@ from dotenv import find_dotenv, load_dotenv
 from sqlalchemy import create_engine
 
 from utils.dataset import get_dataset_ucirepo
-
-# import sys
-# # adding parent folder to sys.path to use utils folder functions
-# root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# sys.path.append(root_dir)
-
 
 # if running locally, try to load .env file
 dotenv_path = find_dotenv(filename=".env", raise_error_if_not_found=False, usecwd=True)
@@ -139,7 +132,7 @@ def main(X: pd.DataFrame, y: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    logging.info("Waiting of the database to start...")
+    # logging.info("Waiting of the database to start...")
     time.sleep(10)  # wait for the database to start
     X_, y_ = get_dataset_ucirepo(repo_id=186)  # get wine dataset
     recreate_empty_table()  # recreate the table in the database
