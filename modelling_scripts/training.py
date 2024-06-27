@@ -22,14 +22,13 @@ sys.path.append(root_dir)
 dotenv_path = find_dotenv(filename=".env", raise_error_if_not_found=True, usecwd=True)
 load_dotenv(dotenv_path, override=True)  # Load variables from .env file
 
-EXPERIMENT_NAME = os.environ.get(
-    "EXPERIMENT_NAME", "wine_quality_hyperparameter_optimization_"
+MLFLOW_EXPERIMENT_NAME = os.environ.get(
+    "MLFLOW_EXPERIMENT_NAME", "wine_quality_hyperparameter_optimization_"
 )
-TRACKING_URL = os.environ.get("TRACKING_URL", "http://127.0.0.1:5001")
-# print(TRACKING_URL)
+MLFLOW_TRACKING_URL = os.environ.get("MLFLOW_TRACKING_URL", "http://127.0.0.1:5001")
 
-mlflow.set_tracking_uri(TRACKING_URL)
-mlflow.set_experiment(EXPERIMENT_NAME)
+mlflow.set_tracking_uri(MLFLOW_TRACKING_URL)
+mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 mlflow.sklearn.autolog()
 
 
@@ -96,7 +95,6 @@ def main():
     X, y = get_dataset_ucirepo()
 
     # Split the data
-    # X_test and y_test will be used for evidently
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )

@@ -11,7 +11,7 @@ scrape_configs:
 #   - job_name: 'evidently'
 #     metrics_path: '/metrics'
 #     static_configs:
-#       - targets: ['evidently_service:8085']
+#       - targets: ['evidently:8085']
 #   - job_name: 'python_service'
 #     metrics_path: '/metrics'
 #     static_configs:

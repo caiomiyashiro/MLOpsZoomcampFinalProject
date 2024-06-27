@@ -50,15 +50,14 @@ services:
       db:
         condition: service_healthy
 
-
   prediction_service:
     build:
       context: prediction_service
       dockerfile: Dockerfile
     restart: always
     environment:
-      TRACKING_URL: ${TRACKING_URL_DOCKER}
-      MODEL_REGISTRY_NAME: ${MODEL_REGISTRY_NAME}
+      MLFLOW_TRACKING_URL: ${MLFLOW_TRACKING_URL_DOCKER}
+      MLFLOW_MODEL_REGISTRY_NAME: ${MLFLOW_MODEL_REGISTRY_NAME}
       AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
       PREDICTION_SERVICE_URL: ${PREDICTION_SERVICE_URL_DOCKER}
     networks:
@@ -80,19 +79,6 @@ services:
     networks:
       - back-tier
       - front-tier
-
-
-  # evidently_service:
-  #   build:
-  #     context: evidently_grafana_monitoring_service
-  #     dockerfile: Dockerfile
-  #   depends_on:
-  #     - grafana
-  #   ports:
-  #     - "8085:8085"
-  #   networks:
-  #     - back-tier
-  #     - front-tier
 
   real_data_simulator:
     build:

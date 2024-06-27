@@ -8,3 +8,4 @@ azure-identity
 azure-storage-blob
 psutil
 prometheus_client
+evidently==0.4.29
