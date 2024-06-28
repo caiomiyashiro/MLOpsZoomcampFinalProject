@@ -43,7 +43,7 @@ MODEL_PERFORMANCE_TIME_SUMMARY = Summary(
 )
 
 
-app = Flask("duration-prediction")
+app = Flask("wine-quality-prediction")
 
 
 @app.before_request
@@ -62,8 +62,12 @@ def after_request(response):
     latency = time.time() - request.start_time
     REQUEST_LATENCY.labels(request.method, request.path).observe(latency)
     REQUEST_COUNT.labels(request.method, request.path, response.status_code).inc()
-    if response.status_code == 200:
-        MODEL_PERFORMANCE_TIME_SUMMARY.observe(response.json["score"])
+
+    # if it's a prometheus request, we don't want to record the model performance
+    if response.status_code == 200 and response.is_json:
+        json_data = response.get_json()
+        if json_data and "score" in json_data:
+            MODEL_PERFORMANCE_TIME_SUMMARY.observe(json_data["score"])
     return response
 
 
@@ -74,9 +78,6 @@ def predict_endpoint():
     """
     request_input = request.get_json()
     score = model.predict(DataFrame([request_input]))[0]
-
-    # request_input['quality'] = score
-    # send_data_row(EVIDENTLY_DATASET_NAME, request_input) # evidently
 
     result = {"score": score}
     return jsonify(result)

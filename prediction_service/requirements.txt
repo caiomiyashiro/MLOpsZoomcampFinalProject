@@ -1,4 +1,4 @@
-scikit-learn~=1.3.0 # because of sklearn
+scikit-learn~=1.3.0
 pandas
 flask
 gunicorn
@@ -8,4 +8,4 @@ azure-identity
 azure-storage-blob
 psutil
 prometheus_client
-evidently==0.4.29
+pytest

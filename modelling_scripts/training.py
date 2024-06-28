@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,missing-module-docstring
+# pylint: disable=invalid-name,missing-module-docstring,import-error,wrong-import-position,no-name-in-module
 
 import os
 import sys
@@ -12,12 +12,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 
 import mlflow
-from utils.dataset import get_dataset_ucirepo
 
 # adding parent folder to sys.path to use utils folder functions
 root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_dir)
-
+from utils.dataset import get_dataset_ucirepo
 
 dotenv_path = find_dotenv(filename=".env", raise_error_if_not_found=True, usecwd=True)
 load_dotenv(dotenv_path, override=True)  # Load variables from .env file

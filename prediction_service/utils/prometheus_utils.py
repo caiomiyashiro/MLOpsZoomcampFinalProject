@@ -1,13 +1,8 @@
 # pylint: disable=missing-module-docstring
-import os
 from time import sleep
 
 import psutil
 from prometheus_client import Gauge
-
-PREDICTION_SERVICE_URL = os.environ.get(
-    "PREDICTION_SERVICE_URL", "http://localhost:9696"
-)
 
 
 def background_metrics_collector():

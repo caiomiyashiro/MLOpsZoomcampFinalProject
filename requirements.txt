@@ -1,7 +1,7 @@
 scikit-learn~=1.3.0 # because of sklearn
 pandas
 flask
-numpy==1.26.4 # because of evidently
+numpy
 gunicorn
 jupyter
 ipykernel
