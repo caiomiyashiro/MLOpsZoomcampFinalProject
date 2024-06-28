@@ -7,7 +7,8 @@ from mlflow.tracking import MlflowClient
 
 
 def get_latest_model_from_registry(
-    registry_name: str = "wine_quality", client: MlflowClient = None
+    registry_name: str = "wine_quality",
+    client: MlflowClient = None,
 ):
     """
     Get the latest model from the model registry.
@@ -17,7 +18,6 @@ def get_latest_model_from_registry(
         registry_name (str): The name of the model registry
         client (MlflowClient): An optional MlflowClient object
     """
-    print("test")
     if client is None:
         client = MlflowClient()
     latest_model = client.get_latest_versions(registry_name)[-1]

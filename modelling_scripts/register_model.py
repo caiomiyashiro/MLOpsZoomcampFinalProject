@@ -1,4 +1,5 @@
 # pylint: disable=missing-module-docstring
+import logging
 import os
 
 from dotenv import find_dotenv, load_dotenv
@@ -17,6 +18,9 @@ MLFLOW_TRACKING_URL = os.environ.get("MLFLOW_TRACKING_URL", "http://localhost:50
 MLFLOW_MODEL_REGISTRY_NAME = os.environ.get(
     "MLFLOW_MODEL_REGISTRY_NAME", "wine_quality"
 )
+logging.info("--- Loaded MLFLOW_EXPERIMENT_NAME: %s", {MLFLOW_EXPERIMENT_NAME})
+logging.info("--- Loaded MLFLOW_TRACKING_URL: %s", MLFLOW_TRACKING_URL)
+logging.info("--- Loaded MLFLOW_MODEL_REGISTRY_NAME: %s", MLFLOW_MODEL_REGISTRY_NAME)
 
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URL)
 mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
@@ -35,7 +39,7 @@ def run_register_top_model():
         experiment_ids=experiment.experiment_id,
         run_view_type=ViewType.ACTIVE_ONLY,
         max_results=1,
-        order_by=["metrics.training_root_mean_squared_error DESC"],
+        order_by=["metrics.training_root_mean_squared_error ASC"],
     )[0]
 
     # Register the best model

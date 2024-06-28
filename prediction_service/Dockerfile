@@ -9,6 +9,7 @@ COPY ["requirements.txt", "./"]
 RUN pip install  -r requirements.txt
 
 COPY ["app.py", "./"]
+COPY ["sample_model.pkl", "./"]
 COPY ["utils/", "./utils"]
 
 EXPOSE 9696

@@ -1,8 +1,11 @@
 # pylint: disable=missing-module-docstring
 
+import logging
 import os
+import pickle
 import threading
 import time
+from time import sleep
 
 from dotenv import find_dotenv, load_dotenv
 from flask import Flask, jsonify, request
@@ -13,6 +16,7 @@ import mlflow
 from utils.mlflow_utils import get_latest_model_from_registry
 from utils.prometheus_utils import background_metrics_collector
 
+sleep(5)
 # if running locally, try to load .env file
 dotenv_path = find_dotenv(filename=".env", raise_error_if_not_found=False, usecwd=True)
 load_dotenv(dotenv_path, override=True)
@@ -21,17 +25,39 @@ MLFLOW_TRACKING_URL = os.environ.get("MLFLOW_TRACKING_URL", "http://127.0.0.1:50
 MLFLOW_MODEL_REGISTRY_NAME = os.environ.get(
     "MLFLOW_MODEL_REGISTRY_NAME", "wine_quality"
 )
+logging.info("--- Loaded MLFLOW_TRACKING_URL: %s", MLFLOW_TRACKING_URL)
+logging.info("--- Loaded MLFLOW_MODEL_REGISTRY_NAME: %s", MLFLOW_MODEL_REGISTRY_NAME)
 
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URL)
-model = get_latest_model_from_registry(MLFLOW_MODEL_REGISTRY_NAME)
+# try download model from registry. If it fails, load sample model.
+# first time this service is run in docker-compose, the model will not be
+# registered yet, so we load a sample model.
+try:
+    model = get_latest_model_from_registry(MLFLOW_MODEL_REGISTRY_NAME)
+    print(
+        f"---------- Registry {MLFLOW_MODEL_REGISTRY_NAME} found. Loading model...",
+        flush=True,
+    )
+except mlflow.exceptions.RestException as e:
+    logging.warning(
+        "!!! Error loading model: %s !!!\n. \
+          Loading sample model. \
+          Please make sure the model is registered in the provided \
+          MLflow registry.",
+        e,
+    )
+    with open("sample_model.pkl", "rb") as f:
+        model = pickle.load(f)
+        print("---------- Loaded sample model", flush=True)
 
-print("Starting Prometheus Service...")
+
+logging.info("Starting Prometheus Service...")
 start_http_server(9090)  # start prometheus server
-print("Starting the service health metrics collection thread....")
+logging.info("Starting the service health metrics collection thread....")
 metrics_thread = threading.Thread(target=background_metrics_collector)
 metrics_thread.daemon = True
 metrics_thread.start()
-print("Thread started...")
+logging.info("Thread started...")
 REQUEST_LATENCY = Summary(
     "api_request_latency_seconds", "Latency of API requests", ["method", "endpoint"]
 )
@@ -77,6 +103,11 @@ def predict_endpoint():
     Predict wine quality
     """
     request_input = request.get_json()
+    print("----------------------------------------", flush=True)
+    print(f"{model.predict(DataFrame([request_input]))}", flush=True)
+    print("----------------------------------------", flush=True)
+    print(model.get_params, flush=True)
+
     score = model.predict(DataFrame([request_input]))[0]
 
     result = {"score": score}

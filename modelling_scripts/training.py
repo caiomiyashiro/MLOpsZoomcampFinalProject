@@ -22,9 +22,11 @@ dotenv_path = find_dotenv(filename=".env", raise_error_if_not_found=True, usecwd
 load_dotenv(dotenv_path, override=True)  # Load variables from .env file
 
 MLFLOW_EXPERIMENT_NAME = os.environ.get(
-    "MLFLOW_EXPERIMENT_NAME", "wine_quality_hyperparameter_optimization_"
+    "MLFLOW_EXPERIMENT_NAME", "wine_quality_hyperparameter_optimization"
 )
 MLFLOW_TRACKING_URL = os.environ.get("MLFLOW_TRACKING_URL", "http://127.0.0.1:5001")
+print(f"--- Loaded MLFLOW_EXPERIMENT_NAME: {MLFLOW_EXPERIMENT_NAME}")
+print(f"--- Loaded MLFLOW_TRACKING_URL: {MLFLOW_TRACKING_URL}")
 
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URL)
 mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
@@ -62,30 +64,68 @@ def train_model(
         "min_samples_leaf": hp.choice(
             "min_samples_leaf", range(1, 21)
         ),  # Integer values from 1 to 20
-        "min_weight_fraction_leaf": hp.uniform("min_weight_fraction_leaf", 0.0, 0.5),
+        # "min_weight_fraction_leaf": hp.uniform("min_weight_fraction_leaf", 0.0, 0.5),
         "max_features": hp.choice(
             "max_features", [None, "sqrt", "log2"] + list(np.arange(0.1, 1.1, 0.1))
         ),
         "max_leaf_nodes": hp.choice("max_leaf_nodes", [None] + list(range(2, 101))),
-        "min_impurity_decrease": hp.uniform("min_impurity_decrease", 0.0, 1.0),
-        "ccp_alpha": hp.uniform("ccp_alpha", 0.0, 1.0),
+        # "min_impurity_decrease": hp.uniform("min_impurity_decrease", 0.0, 1.0),
+        # "ccp_alpha": hp.uniform("ccp_alpha", 0.0, 1.0),
     }
+
+    # space = {
+    #     'criterion': hp.choice('criterion', ['gini', 'entropy', 'log_loss']),
+    #     'splitter': hp.choice('splitter', ['best', 'random']),
+    #     'max_depth': hp.choice('max_depth', [
+    #         None,
+    #         hp.randint('max_depth_int', 1, 51)  # randint is exclusive on upper bound
+    #     ]),
+    #     'min_samples_split': hp.randint('min_samples_split', 2, 21),
+    #     'min_samples_leaf': hp.randint('min_samples_leaf', 1, 21),
+    #     'min_weight_fraction_leaf': hp.uniform('min_weight_fraction_leaf', 0.0, 0.5),
+    #     'max_features': hp.choice('max_features', [
+    #         None,
+    #         'sqrt',
+    #         'log2',
+    #         hp.uniform('max_features_float', 0.1, 1.0)
+    #     ]),
+    #     'random_state': hp.choice('random_state', [
+    #         None,
+    #         hp.randint('random_state_int', 1000)
+    #     ]),
+    #     'max_leaf_nodes': hp.choice('max_leaf_nodes', [
+    #         None,
+    #         hp.randint('max_leaf_nodes_int', 2, 101)  # randint is exclusive on upper bound
+    #     ]),
+    #     'min_impurity_decrease': hp.uniform('min_impurity_decrease', 0.0, 0.2),
+    #     'class_weight': hp.choice('class_weight', [
+    #         None,
+    #         'balanced',
+    #         {0: hp.uniform('weight_class_0', 0.1, 10), 1: hp.uniform('weight_class_1', 0.1, 10)},
+    #         {0: hp.uniform('weight_class_0_alt', 0.1, 10), 1: 1.0},
+    #     ]),
+    #     'ccp_alpha': hp.uniform('ccp_alpha', 0.0, 0.05)
+    # }
 
     # Define the objective function
     def objective(params):
         with mlflow.start_run():
             # Create the model with the given hyperparameters
             model = DecisionTreeRegressor(**params)
+            # model = DecisionTreeClassifier(**params)
             model.fit(X_train, y_train)
             y_val_pred = model.predict(X_val)
+            print(params)
+            print(np.unique(y_val_pred, return_counts=True))
+            print("----------------------------")
             mse = mean_squared_error(y_val, y_val_pred)
             mlflow.sklearn.log_model(model, artifact_path="artifacts")
         # Return the loss (negative score)
-        return {"loss": mse * -1, "status": STATUS_OK}
+        return {"loss": mse, "status": STATUS_OK}
 
     # Perform hyperparameter optimization
     trials = Trials()
-    _ = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=10, trials=trials)
+    _ = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=100, trials=trials)
 
 
 def main():

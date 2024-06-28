@@ -17,7 +17,6 @@ def get_latest_model_from_registry(
         registry_name (str): The name of the model registry
         client (MlflowClient): An optional MlflowClient object
     """
-    print("test")
     if client is None:
         client = MlflowClient()
     latest_model = client.get_latest_versions(registry_name)[-1]

@@ -11,7 +11,6 @@ def background_metrics_collector():
     memory_usage = Gauge("memory_usage", "Memory usage in bytes")
     disk_usage = Gauge("disk_usage", "Disk usage percentage")
     while True:
-        print("Collecting metrics...")
         cpu_percent_measure = psutil.cpu_percent()
         memory_bytes_measure = psutil.virtual_memory().used
         disk_percent_measure = psutil.disk_usage("/").percent

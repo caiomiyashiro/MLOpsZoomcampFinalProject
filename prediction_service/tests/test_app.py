@@ -32,9 +32,9 @@ def client(patched_app):
 
     patched_app.config["TESTING"] = True
     with patched_app.test_client() as client_:
-        print("Yielding client")
+        # print("Yielding client")
         yield client_
-    print("Client fixture teardown")
+    # print("Client fixture teardown")
 
 
 def test_predict_endpoint(client):

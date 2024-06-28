@@ -60,6 +60,7 @@ services:
       MLFLOW_MODEL_REGISTRY_NAME: ${MLFLOW_MODEL_REGISTRY_NAME}
       AZURE_STORAGE_CONNECTION_STRING: ${AZURE_STORAGE_CONNECTION_STRING}
       PREDICTION_SERVICE_URL: ${PREDICTION_SERVICE_URL_DOCKER}
+      PYTHONUNBUFFERED: 1
     networks:
       - back-tier
     ports:
@@ -80,24 +81,24 @@ services:
       - back-tier
       - front-tier
 
-  real_data_simulator:
-    build:
-      context: real_data_simulator
-      dockerfile: Dockerfile
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_HOST: ${POSTGRES_HOST_DOCKER}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_TABLE: ${POSTGRES_TABLE}
-      PREDICTION_SERVICE_URL: ${PREDICTION_SERVICE_URL_DOCKER}
-      DATA_TIMEZONE: ${DATA_TIMEZONE}
-    networks:
-      - back-tier
-    ports:
-      - "7777:7777"
-    entrypoint: python real_data_sim.py
+  # real_data_simulator:
+  #   build:
+  #     context: real_data_simulator
+  #     dockerfile: Dockerfile
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_HOST: ${POSTGRES_HOST_DOCKER}
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #     POSTGRES_TABLE: ${POSTGRES_TABLE}
+  #     PREDICTION_SERVICE_URL: ${PREDICTION_SERVICE_URL_DOCKER}
+  #     DATA_TIMEZONE: ${DATA_TIMEZONE}
+  #   networks:
+  #     - back-tier
+  #   ports:
+  #     - "7777:7777"
+  #   entrypoint: python real_data_sim.py
 
   prometheus:
     image: prom/prometheus
