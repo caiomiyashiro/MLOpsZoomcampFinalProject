@@ -64,6 +64,13 @@ resource "azurerm_key_vault_secret" "storage_connection_string" {
   depends_on = [azurerm_key_vault_access_policy.terraform_policy]
 }
 
+resource "azurerm_key_vault_secret" "secrets" {
+  for_each     = var.key-vault-secrets
+  name         = each.key
+  value        = each.value
+  key_vault_id = azurerm_key_vault.kv.id
+}
+
 resource "azurerm_user_assigned_identity" "uai" {
   resource_group_name = azurerm_resource_group.mlopsproject.name
   location            = azurerm_resource_group.mlopsproject.location
