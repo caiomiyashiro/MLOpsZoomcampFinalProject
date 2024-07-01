@@ -103,7 +103,7 @@ def predict_endpoint():
     Predict wine quality
     """
     request_input = request.get_json()
-    # print("----------------------------------------111111222", flush=True)
+    # print("----------------------------------------1111112223", flush=True)
     # print(f"{model.predict(DataFrame([request_input]))}", flush=True)
     # print("----------------------------------------", flush=True)
     # print(model.get_params, flush=True)
