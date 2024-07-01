@@ -8,7 +8,7 @@ SERVICES_TO_START="db mlflow prediction_service"
 
 # Function to check if the service is ready
 check_service() {
-    curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:9696/healthcheck
+    curl -s -o /dev/null -w "%{http_code}" ${PREDICTION_SERVICE_URL}/healthcheck
 }
 
 # Start docker-compose in detached mode

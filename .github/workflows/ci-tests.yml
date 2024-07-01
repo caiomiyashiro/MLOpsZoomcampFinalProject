@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r prediction_service/requirements.txt
 
       - name: Az CLI login
         uses: azure/login@v1
@@ -67,7 +67,7 @@ jobs:
         env:
           PREDICTION_SERVICE_URL: ${{ env.PREDICTION_SERVICE_URL }}
         run: |
-          . integration_test_api_request.sh
+          . run_integration_test_api_request.sh
 
   # tf-plan:
   #   runs-on: ubuntu-latest
