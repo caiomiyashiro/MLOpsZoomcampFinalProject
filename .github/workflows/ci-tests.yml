@@ -14,22 +14,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.10
+        with:
+          ref: develop
+
+      - name: Checkout develop branch
+        run: |
+          git fetch origin develop
+          git checkout develop
+          git pull origin develop
+
+      - name: Set up Python 3.9.19
         uses: actions/setup-python@v2
         with:
-          python-version: 3.10
+          python-version: 3.9.19
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r prediction_service/requirements.txt
 
       - name: Az CLI login
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          auth-type: SERVICE_PRINCIPAL
       - name: Run Azure CLI commands
         run: |
           az account show
@@ -56,10 +64,10 @@ jobs:
 
       - name: Integration Test API Request
         working-directory: ./prediction_service/tests/integration_test_api_request
-        with:
-          PREDICTION_SERVICE_URL: $PREDICTION_SERVICE_URL
+        env:
+          PREDICTION_SERVICE_URL: ${{ env.PREDICTION_SERVICE_URL }}
         run: |
-          . integration_test_api_request.sh
+          . run_integration_test_api_request.sh
 
   # tf-plan:
   #   runs-on: ubuntu-latest
