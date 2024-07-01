@@ -22,14 +22,9 @@ variable "vm_login_credentials" {
     sensitive   = true
 }
 
-variable "postgres_login_credentials" {
-    description = "The login credentials for the PostgreSQL database"
-    type        = map
-    sensitive   = true
-}
-
 variable "cloud_config_file_path" {
   description = "The path to the cloud-config.yaml file"
   type        = string
-  default     = "/Users/caiomiyashiro/repo/Personal/MLOpsZoomcampFinalProject/infrastructure/cloud-config.yaml"
+
+  default     = "cloud-config.yaml"
 }

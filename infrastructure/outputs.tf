@@ -1,5 +1,6 @@
 output "vm_public_ip_address" {
   value = azurerm_public_ip.vm_public_ip.ip_address
+  depends_on  = [azurerm_public_ip.vm_public_ip]
 }
 
 output "storage_account_connection_string" {

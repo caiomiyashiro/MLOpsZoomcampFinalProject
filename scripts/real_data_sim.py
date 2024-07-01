@@ -1,6 +1,7 @@
-# pylint: disable=invalid-name,missing-module-docstring
+# pylint: disable=invalid-name,missing-module-docstring,import-error,wrong-import-position,no-name-in-module
 import json
 import os
+import sys
 
 # from utils.system_metrics import get_system_metrics
 # from utils.evidently import send_data_row
@@ -17,6 +18,9 @@ import requests
 from dotenv import find_dotenv, load_dotenv
 from sqlalchemy import create_engine
 
+# adding parent folder to sys.path to use utils folder functions
+root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(root_dir)
 from utils.dataset import get_dataset_ucirepo
 
 # if running locally, try to load .env file
