@@ -32,11 +32,16 @@ In order to support this API and the overall DevOps cycle the following architec
     - Azure Key Vault
 
 2 - The VM is created and then automatically initialized with the script `infrastructure/cloud-config.yaml` that installs all the required packages to build and run a docker-container containing all the services needed for this project:
-    - **Prediction service** (folder `prediction_service`): API to receive requests and return the predictions. The model will load the registered model from MLFlow and use it to make new predictions. In the first times that the service is run, there won't be a model trained and registered yet in MLFlow, so I added a `prediction_service/sample_model.pkl` that will be loaded temporarily while there are no models in the MLFlow registry.
-    - **Prometheus** (folder `prometheus`): Scrape metrics about the system's condition and model metrics
-    - **Grafana** (folder `grafana`): Collect metrics from Prometheus and display dashboards and alerts
-    - **MLFlow** (folder `mlflow`): Track and version model training
-    - **PostgreSQL** (no folder, downloaded directly from docker): Store metrics from MLFlow
+
+- **Prediction service** (folder `prediction_service`): API to receive requests and return the predictions. The model will load the registered model from MLFlow and use it to make new predictions. In the first times that the service is run, there won't be a model trained and registered yet in MLFlow, so I added a `prediction_service/sample_model.pkl` that will be loaded temporarily while there are no models in the MLFlow registry.
+
+- **Prometheus** (folder `prometheus`): Scrape metrics about the system's condition and model metrics
+
+- **Grafana** (folder `grafana`): Collect metrics from Prometheus and display dashboards and alerts
+
+- **MLFlow** (folder `mlflow`): Track and version model training
+
+- **PostgreSQL** (no folder, downloaded directly from docker): Store metrics from MLFlow
 
 # Setup Instructions
 
@@ -54,7 +59,7 @@ The above command will:
     - If you don't want to execute the `.sh` script, please get the connection string variable from the newly created Storage Account  (check [here](https://youtu.be/x2A0i8OMheA?si=mgYngRX5qAXh_kFI&t=74) for a tutorial), replace it in the `.env.sample` file and rename it to `.env`. It will be used by the docker-compose services.
 
 ------------------------------------------------------------------------------------------------
-Observation: In case you want to SSH the VM from your local computer, execute the following steps **from the same terminal you used to execute the terraform scripts**:
+**Observation**: In case you want to SSH the VM from your local computer, execute the following steps **from the same terminal you used to execute the terraform scripts**:
     * `terraform output -raw private_key_pem > <local_folder>` - This will export the private key needed to access the VM into your local folder
     * `ssh -i ~/.ssh/id_rsa.pem azureuser@$(terraform output -raw vm_public_ip_address)`. If it doesn't work, confirm if the VM's public IP in Azure Portal is correct with what terraform outputs with `terraform output -raw vm_public_ip_address`. In case it's not, replace the command by the correct IP.
 
@@ -67,7 +72,7 @@ You can also run the services offline, in your computer. For that, run `make doc
 
 ## Offline Scripts
 
-For the sake of testing the project, there 3 scripts that simulates scripts running outside from the VM, that would be executed by the ML Engineer or Data Scientist, **after the VM docker-compose setup is completed**:
+For the sake of testing the project, there are 3 scripts that simulates scripts running outside from the VM, that would be executed by the ML Engineer or Data Scientist, **after the VM docker-compose setup is completed**:
 
 - Folder `scripts`: Contains the scripts used to train and register the models using MLFlow and to simulate real-time data being sent to the service.
     - Running `modelling_scripts/training.py` will train the data on a Regression Tree, test 100 models and track their performance and hiperparameters into MLFlow. You'll be able to check MLFlow UI by the URL indicated in the `MLFLOW_TRACKING_URL` variable in `.env` file.
@@ -82,3 +87,10 @@ For the sake of testing the project, there 3 scripts that simulates scripts runn
 4. No makefile is provided.
 5. Pre-commit hooks are available and configured at `.pre-commit-config.yaml`.
 6. **CI/CD PIPELINE**
+
+
+
+
+
+
+scp -i ~/.ssh/id_rsa.pem docker-compose.yml azureuser@4.215.207.30:/home/azureuser/mlops_zoomcamp_finalproject3/docker-compose.yml

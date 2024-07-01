@@ -3,8 +3,13 @@
 import os
 import sys
 
-root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Add the path to the 'prediction_service' directory
+root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(root_dir)
+
+# Add the path to the 'tests' directory
+tests_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(tests_dir)
 
 import json
 
@@ -27,6 +32,7 @@ def test_predict_endpoint():
     PREDICTION_SERVICE_URL = os.environ.get(
         "PREDICTION_SERVICE_URL", "http://127.0.0.1:9696"
     )
+    print(f"------------- PREDICTION_SERVICE_URL {PREDICTION_SERVICE_URL}")
 
     df, _ = get_dataset_ucirepo(repo_id=186)
 
@@ -42,4 +48,5 @@ def test_predict_endpoint():
 
 if __name__ == "__main__":
     response = test_predict_endpoint()
+    print(response.status_code)
     assert response.status_code == 200

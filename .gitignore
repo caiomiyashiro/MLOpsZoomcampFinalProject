@@ -5,6 +5,7 @@ mlruns/
 *.parquet
 *.bin
 *.pkl
+!prediction_service/sample_model.pkl
 *__pycache__*
 *.pickle
 local.settings.json

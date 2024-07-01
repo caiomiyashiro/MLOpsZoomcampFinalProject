@@ -13,6 +13,6 @@ destroy-infra:
 	terraform destroy -auto-approve && \
 	cd ..
 docker-up:
-	docker-compose up --build
+	docker-compose up -d --build
 docker-down:
 	docker-compose down

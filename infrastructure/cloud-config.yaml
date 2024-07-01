@@ -13,7 +13,11 @@ runcmd:
   - echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
   - sudo apt-get update -y
   - sudo apt install make
-  - sudo apt-get install docker.io azure-cli docker-compose -y
+  - sudo apt-get install docker.io azure-cli gnome-keyring -y
+  - sudo usermod -aG docker ${USER}
+  - newgrp docker
+  - sudo curl -L "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
+  - sudo chmod +x /usr/bin/docker-compose
   - sudo systemctl start docker
   - sudo systemctl enable docker
   - wget https://repo.anaconda.com/archive/Anaconda3-2024.02-1-Linux-x86_64.sh
@@ -26,3 +30,4 @@ runcmd:
   - git clone https://github.com/caiomiyashiro/mlops_zoomcamp_finalproject.git /home/azureuser/mlops_zoomcamp_finalproject
   - cd /home/azureuser/mlops_zoomcamp_finalproject
   - cp .env.sample .env
+  - make docker-up

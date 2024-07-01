@@ -38,9 +38,9 @@ try:
         f"---------- Registry {MLFLOW_MODEL_REGISTRY_NAME} found. Loading model...",
         flush=True,
     )
-except mlflow.exceptions.RestException as e:
+except (mlflow.exceptions.RestException, mlflow.exceptions.MlflowException) as e:
     logging.warning(
-        "!!! Error loading model: %s !!!\n. \
+        "------ Registry model not loaded: %s ------\n. \
           Loading sample model. \
           Please make sure the model is registered in the provided \
           MLflow registry.",
@@ -48,7 +48,7 @@ except mlflow.exceptions.RestException as e:
     )
     with open("sample_model.pkl", "rb") as f:
         model = pickle.load(f)
-        print("---------- Loaded sample model", flush=True)
+        print("------ Loaded sample model", flush=True)
 
 
 logging.info("Starting Prometheus Service...")
@@ -103,10 +103,10 @@ def predict_endpoint():
     Predict wine quality
     """
     request_input = request.get_json()
-    print("----------------------------------------", flush=True)
-    print(f"{model.predict(DataFrame([request_input]))}", flush=True)
-    print("----------------------------------------", flush=True)
-    print(model.get_params, flush=True)
+    # print("----------------------------------------", flush=True)
+    # print(f"{model.predict(DataFrame([request_input]))}", flush=True)
+    # print("----------------------------------------", flush=True)
+    # print(model.get_params, flush=True)
 
     score = model.predict(DataFrame([request_input]))[0]
 
@@ -120,6 +120,14 @@ def metrics():
     Explicitly expose prometheus metrics endpoint
     """
     return generate_latest()
+
+
+@app.route("/healthcheck")
+def healthcheck():
+    """
+    Healtcheck endpoint
+    """
+    return jsonify({"status": "healthy"}), 200
 
 
 if __name__ == "__main__":

@@ -1,0 +1,79 @@
+name: CI-Tests
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  pull_request:
+    branches:
+      - 'develop'
+
+env:
+  AZURE_STORAGE_CONNECTION_STRING: ${{secrets.AZURE_STORAGE_CONNECTION_STRING}}
+  PREDICTION_SERVICE_URL: ${{secrets.PREDICTION_SERVICE_URL_DOCKER}}
+  CLIENT-ID: ${{secrets.AZURE_CLIENT_ID }}
+  TENANT-ID: ${{secrets.AZURE_TENANT_ID }}
+  SUBSCRIPTION-ID: ${{secrets.AZURE_SUBSCRIPTION_ID }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Unit Tests
+        working-directory: ./prediction_service/tests
+        run: |
+          pytest .
+
+      - name: Lint
+        run: |
+          pylint --recursive=y .
+
+      - name: Az CLI login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Run Azure CLI commands
+        run: |
+          az account show
+          az group list
+
+      - name: Integration Test API Request
+        working-directory: ./prediction_service/tests/integration_test_api_request
+        run: |
+          . integration_test_api_request.sh
+
+  # tf-plan:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Az CLI login
+  #       uses: azure/login@v1
+  #       with:
+  #         client-id: ${{ secrets.AZURE_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  #     - name: Run Azure CLI commands
+  #       run: |
+  #         az account show
+  #         az group list
+
+  #     uses: hashicorp/setup-terraform@v2
+  #     - name: Terraform Plan
+  #       id: plan
+  #       working-directory: ./infrastructure
+  #       run: |
+  #         terraform init && terraform plan --var-file vars/prod.tfvars
