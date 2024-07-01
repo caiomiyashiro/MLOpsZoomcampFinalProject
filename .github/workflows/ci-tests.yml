@@ -27,9 +27,9 @@ jobs:
       - name: Az CLI login
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID || env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID || env.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID || env.AZURE_SUBSCRIPTION_ID }}
       - name: Run Azure CLI commands
         run: |
           az account show
@@ -56,8 +56,8 @@ jobs:
 
       - name: Integration Test API Request
         working-directory: ./prediction_service/tests/integration_test_api_request
-        with:
-          PREDICTION_SERVICE_URL: $PREDICTION_SERVICE_URL
+        env:
+          PREDICTION_SERVICE_URL: ${{ env.PREDICTION_SERVICE_URL }}
         run: |
           . integration_test_api_request.sh
 
