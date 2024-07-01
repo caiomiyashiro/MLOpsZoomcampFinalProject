@@ -23,10 +23,10 @@ jobs:
           git checkout main
           git pull origin main
 
-      - name: Set up Python 3.19.19
+      - name: Set up Python 3.9.19
         uses: actions/setup-python@v2
         with:
-          python-version: 3.19.19
+          python-version: 3.9.19
 
       - name: Install dependencies
         run: |
