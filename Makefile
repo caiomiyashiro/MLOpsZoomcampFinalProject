@@ -5,6 +5,8 @@ setup-infra:
 	terraform init && \
 	terraform plan -out main.tfout && \
 	terraform apply main.tfout && \
+	chmod +x ../scripts/shell/update_env.sh && \
+	../scripts/shell/update_env.sh && \
 	cd ..
 destroy-infra:
 	cd infrastructure && \

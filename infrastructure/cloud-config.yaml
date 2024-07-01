@@ -12,6 +12,7 @@ runcmd:
   - AZ_REPO=$(lsb_release -cs)
   - echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | sudo tee /etc/apt/sources.list.d/azure-cli.list
   - sudo apt-get update -y
+  - sudo apt install make
   - sudo apt-get install docker.io azure-cli docker-compose -y
   - sudo systemctl start docker
   - sudo systemctl enable docker
@@ -22,3 +23,5 @@ runcmd:
   - connection_string=$(az keyvault secret show --name storage-connection-string --vault-name mlopsproject-kv --query value -o tsv)
   - echo 'export AZURE_STORAGE_CONNECTION_STRING='\'$connection_string\' >> /home/azureuser/.bashrc
   - source /home/azureuser/.bashrc
+  - git clone https://github.com/caiomiyashiro/mlops_zoomcamp_finalproject.git /home/azureuser/mlops_zoomcamp_finalproject
+  - cd /home/azureuser/mlops_zoomcamp_finalproject

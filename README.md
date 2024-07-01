@@ -46,9 +46,12 @@ In order to support this API and the overall DevOps cycle the following architec
 
 2 - In order to be able to be ableto create Azure Resources via Terraform, you need to manually create an application that contains the necessary permissions. In case you don't know, follow the steps in this video, https://youtu.be/wB52Rd5N9IQ?si=TviEVsM8N9uUsh29&t=754 (the specific timestamp is already selected). Add the variables `subscription_id`, `client_id`, `client_secret`, `tenant_id` to the `infrastructure/terraform.tfvars` as shown in `infrastructure/terraform.tfvars.sample`.
 
-3 - Proceed with the infrastructure creation with terraform commands in the `infrastructure` folder. `terraform init`, `terraform plan -out main.tfout`, and `terraform apply main.tfout.
+3 - Proceed with the infrastructure creation with `make setup-infra` commands from the **project root folder**.
 
-The above instructions will create the diagram showed above.
+The above command will:
+- Create the infra represented by diagram showed above.
+- Execute the command `scripts/shell/update_env.sh` that will create the `.env` file based on `.env.sample` file but with the newly created `AZURE_STORAGE_CONNECTION_STRING` environment variable.
+    - If you don't want to execute the `.sh` script, please get the connection string variable from the newly created Storage Account  (check [here](https://youtu.be/x2A0i8OMheA?si=mgYngRX5qAXh_kFI&t=74) for a tutorial), replace it in the `.env.sample` file and rename it to `.env`. It will be used by the docker-compose services.
 
 ------------------------------------------------------------------------------------------------
 Observation: In case you want to SSH the VM from your local computer, execute the following steps **from the same terminal you used to execute the terraform scripts**:
@@ -58,9 +61,9 @@ Observation: In case you want to SSH the VM from your local computer, execute th
 --------------------------------
 ## Local docker-compose services
 
-You can also run the services offline, in your computer.  For that, run `docker-compose up --build` from the `root` folder to build and run the services.
+**Before you run it locally**, you should pay attention to the `DATA_TIMEZONE` variable in the `.env` file, as leaving it to *JAPAN* might lead to your data not being show in Grafana in your timezone.
 
-In case you want to run it offline, the only **three** things that you will have to edit manually is setting the `.env` file like the `.env.sample` and add the `connection_string` from your storage account from Azure (check [here](https://youtu.be/x2A0i8OMheA?si=mgYngRX5qAXh_kFI&t=74) for a tutorial). Also, pay attention to the `DATA_TIMEZONE` variable, as leaving it to *JAPAN* might lead to your data not being show in Grafana in your timezone.
+You can also run the services offline, in your computer. For that, run `make docker-up` from the ` project root` folder to build and run the services.
 
 ## Offline Scripts
 
