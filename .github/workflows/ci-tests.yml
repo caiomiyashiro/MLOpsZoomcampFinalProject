@@ -14,10 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.10
+        with:
+          ref: develop
+
+      - name: Checkout develop branch
+        run: |
+          git fetch origin develop
+          git checkout develop
+          git pull origin develop
+
+      - name: Set up Python 3.9.19
         uses: actions/setup-python@v2
         with:
-          python-version: 3.10
+          python-version: 3.9.19
 
       - name: Install dependencies
         run: |
@@ -30,7 +39,8 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID || env.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID || env.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID || env.AZURE_SUBSCRIPTION_ID }}
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET || env.AZURE_CLIENT_SECRET }}
+        env:
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       - name: Run Azure CLI commands
         run: |
           az account show
