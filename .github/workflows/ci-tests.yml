@@ -9,13 +9,6 @@ on:
     branches:
       - 'develop'
 
-env:
-  AZURE_STORAGE_CONNECTION_STRING: ${{secrets.AZURE_STORAGE_CONNECTION_STRING}}
-  PREDICTION_SERVICE_URL: ${{secrets.PREDICTION_SERVICE_URL_DOCKER}}
-  CLIENT-ID: ${{secrets.AZURE_CLIENT_ID }}
-  TENANT-ID: ${{secrets.AZURE_TENANT_ID }}
-  SUBSCRIPTION-ID: ${{secrets.AZURE_SUBSCRIPTION_ID }}
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -31,15 +24,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Unit Tests
-        working-directory: ./prediction_service/tests
-        run: |
-          pytest .
-
-      - name: Lint
-        run: |
-          pylint --recursive=y .
-
       - name: Az CLI login
         uses: azure/login@v1
         with:
@@ -51,8 +35,29 @@ jobs:
           az account show
           az group list
 
+      - name: 'Get secrets from Azure Key Vault'
+        run: |
+          SECRET_NAMES=$(az keyvault secret list --vault-name "mlopsproject-kv" --query "[].name" -o tsv)
+          echo "$SECRET_NAMES" | while IFS= read -r SECRET_NAME
+          do
+            SECRET_VALUE=$(az keyvault secret show --name "$SECRET_NAME" --vault-name "mlopsproject-kv" --query value -o tsv)
+            ENV_VAR_NAME=$(echo "$SECRET_NAME" | tr '-' '_')
+            echo "$ENV_VAR_NAME=$SECRET_VALUE" >> $GITHUB_ENV
+          done
+
+      - name: Run Unit Tests
+        working-directory: ./prediction_service/tests
+        run: |
+          pytest .
+
+      - name: Lint
+        run: |
+          pylint --recursive=y .
+
       - name: Integration Test API Request
         working-directory: ./prediction_service/tests/integration_test_api_request
+        with:
+          PREDICTION_SERVICE_URL: $PREDICTION_SERVICE_URL
         run: |
           . integration_test_api_request.sh
 

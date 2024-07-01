@@ -28,3 +28,25 @@ variable "cloud_config_file_path" {
 
   default     = "cloud-config.yaml"
 }
+
+variable "key-vault-secrets" {
+  type = map(string)
+  default = {
+    "MLFLOW-EXPERIMENT-NAME" = "wine_quality_hyperparameter_optimization"
+    "MLFLOW-TRACKING-URL" = "http://127.0.0.1:5001"
+    "MLFLOW-TRACKING-URL-DOCKER" = "http://mlflow:5001"
+    "MLFLOW-MODEL-REGISTRY-NAME" = "wine_quality"
+
+    "POSTGRES-USER" = "example"
+    "POSTGRES-PASSWORD" = "example" # pragma: allowlist secret
+    "POSTGRES-DB" = "postgres"
+    "POSTGRES-HOST" = "127.0.0.1"
+    "POSTGRES-HOST-DOCKER" = "db"
+    "POSTGRES-TABLE" = "wine_quality"
+
+    "PREDICTION-SERVICE-URL" = "http://127.0.0.1:9696"
+    "PREDICTION-SERVICE-URL-DOCKER" = "http://prediction_service:9696"
+
+    "DATA-TIMEZONE" = "Japan"
+  }
+}
