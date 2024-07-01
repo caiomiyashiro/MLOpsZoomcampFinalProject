@@ -7,6 +7,7 @@ DOCKER_COMPOSE_FILE="../../../docker-compose.yml"
 SERVICES_TO_START="db mlflow prediction_service"
 
 # Function to check if the service is ready
+# if running locally, PREDICTION_SERVICE_URL is not set...
 check_service() {
     curl -s -o /dev/null -w "%{http_code}" ${PREDICTION_SERVICE_URL}/healthcheck
 }

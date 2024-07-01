@@ -1,4 +1,4 @@
-name: CI-Tests
+name: CI-Main
 
 permissions:
   id-token: write
@@ -7,17 +7,26 @@ permissions:
 on:
   pull_request:
     branches:
-      - 'develop'
+      - 'main'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.10
+        with:
+          ref: main
+
+      - name: Checkout main branch
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull origin main
+
+      - name: Set up Python 3.19.19
         uses: actions/setup-python@v2
         with:
-          python-version: 3.10
+          python-version: 3.19.19
 
       - name: Install dependencies
         run: |
