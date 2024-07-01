@@ -25,3 +25,4 @@ runcmd:
   - source /home/azureuser/.bashrc
   - git clone https://github.com/caiomiyashiro/mlops_zoomcamp_finalproject.git /home/azureuser/mlops_zoomcamp_finalproject
   - cd /home/azureuser/mlops_zoomcamp_finalproject
+  - cp .env.sample .env
