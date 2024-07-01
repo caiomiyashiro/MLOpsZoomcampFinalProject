@@ -14,6 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: develop
+
+      - name: Checkout develop branch
+        run: |
+          git fetch origin develop
+          git checkout develop
+          git pull origin develop
+
       - name: Set up Python 3.9.19
         uses: actions/setup-python@v2
         with:
