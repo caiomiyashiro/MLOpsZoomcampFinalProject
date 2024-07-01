@@ -9,3 +9,4 @@ azure-storage-blob==12.20.0
 psutil==6.0.0
 prometheus_client==0.20.0
 pytest==8.2.2
+pylint==3.2.3 # for github actions
