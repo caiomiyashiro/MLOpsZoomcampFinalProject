@@ -27,5 +27,5 @@ fi
 if [ "$IS_MLFLOW_REMOTE_STORAGE" = "true" ]; then
     echo MLFLOW_ARTIFACT_URL=wasbs://$AZURE_STORAGE_CONTAINER_NAME@$AZURE_STORAGE_ACCOUNT_NAME.blob.core.windows.net
 else
-    echo MLFLOW_ARTIFACT_URL=./mlflow_data/artifacts
+    echo MLFLOW_ARTIFACT_URL=/tmp/mlflow_artifacts
 fi

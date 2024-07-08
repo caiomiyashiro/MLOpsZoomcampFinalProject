@@ -96,7 +96,7 @@ def train_model(
 
     # Perform hyperparameter optimization
     trials = Trials()
-    _ = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=100, trials=trials)
+    _ = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=50, trials=trials)
 
 
 def main():

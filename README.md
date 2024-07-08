@@ -72,7 +72,8 @@ The above command will:
 For the sake of testing the project, there are 3 scripts that simulates scripts running outside from the VM, that would be executed by the ML Engineer or Data Scientist, **after the VM docker-compose setup is completed**. I also recommend creating a virtual environment using the `./requirements.txt` file.
 
 - Folder `scripts`: Contains the scripts used to train and register the models using MLFlow and to simulate real-time data being sent to the service.
-    - Running `modelling_scripts/training.py` will train the data on a Regression Tree, test 100 models and track their performance and hiperparameters into MLFlow. You'll be able to check MLFlow UI by the URL indicated in the `MLFLOW_TRACKING_URL` variable in `.env` file.
+    - `**Please wait between 5-10 minutes to run the scripts after the remote vm is created as it takes time to install and configure all the services.**`
+    - Running `modelling_scripts/training.py` will train the data on a Regression Tree, test 50 models and track their performance and hiperparameters into MLFlow. You'll be able to check MLFlow UI by the URL indicated in the `MLFLOW_TRACKING_URL` variable in `.env` file.
     - The script `modelling_scripts/register_model.py` will then select the best model among those and register it into MLFlow registry.
     - The script `modelling_scripts/real_data_simulator.py` simulates data being sent to the prediction_service in an unregular interval, in order to see the metrics arriving and being displayed in Grafana.
 
@@ -94,11 +95,10 @@ Initially, the following endpoints will be available when the services are up:
 You can also run all the services locally and use the `local scripts` to interact with them.
 
 **Before you run it locally**, you should pay attention to:
-    * If you don't have the file `.env`, copy the `.env.sample` and rename it to `.env`, as the services will depend on those variables to run. Besides **change the variable REMOTE_MLFLOW_STORAGE to false**, so the MLFLow knows where to send the tracking data.
+    * If you don't have the file `.env`, copy the `.env.sample` and rename it to `.env`, as the services will depend on those variables to run. Besides **change the variable IS_MLFLOW_REMOTE_STORAGE and IS_MLFLOW_REMOTE_SERVER to false**, so the MLFLow knows where process the data locally and store it in a temporary folder inside the container.
     * Change the `DATA_TIMEZONE` variable in the `.env` file to your timezone, as leaving it to *JAPAN* might lead to your data not being show in Grafana in your timezone.
 
 Finally, run `make docker-up` **from the project root folder** to build and run the services and execute the any of the local scripts.
-    * Makefile assumes dockerV2, *i.e.*, it's calling `docker compose` (without hifen) instead of `docker-compose`(with hifen). Change accordingly, if needed.
 
 # Best practices
 
