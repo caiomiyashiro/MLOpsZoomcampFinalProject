@@ -23,7 +23,7 @@ resource "azurerm_resource_group" "mlopsproject"{ # name of the resource to be r
 }
 
 resource "azurerm_storage_account" "mlopsproject" {
-  name                     = "cm37mlopsproject"
+  name                     = var.azurerm_storage_account_name
   resource_group_name      = azurerm_resource_group.mlopsproject.name
   location                 = azurerm_resource_group.mlopsproject.location
   account_tier             = "Standard"
@@ -33,7 +33,7 @@ resource "azurerm_storage_account" "mlopsproject" {
 }
 
 resource "azurerm_storage_container" "vm_storage_container" {
-  name                  = "vm-container"
+  name                  = var.azurerm_storage_container_name
   storage_account_name  = azurerm_storage_account.mlopsproject.name
   container_access_type = "private"
 }
@@ -69,6 +69,8 @@ resource "azurerm_key_vault_secret" "secrets" {
   name         = each.key
   value        = each.value
   key_vault_id = azurerm_key_vault.kv.id
+
+  depends_on = [azurerm_key_vault_access_policy.terraform_policy]
 }
 
 resource "azurerm_user_assigned_identity" "uai" {

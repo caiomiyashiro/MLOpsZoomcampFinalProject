@@ -15,4 +15,13 @@ output "private_key_pem" {
 
 output "public_key_openssh" {
   value = tls_private_key.vm_ssh.public_key_openssh
+  sensitive = true
+}
+
+output "storage_account_name" {
+  value = azurerm_storage_account.mlopsproject.name
+}
+
+output "storage_container_name" {
+  value = azurerm_storage_container.vm_storage_container.name
 }

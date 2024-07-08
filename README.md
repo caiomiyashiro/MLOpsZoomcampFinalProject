@@ -19,7 +19,7 @@ The goal of the project is to apply what has been learned during the MLOps Zoomc
 
 # Introduction
 
-In this project I focused in exposing an online API that would receive requests with the model's input data and output the wine quality prediction.
+In this project I focused in exposing an online API that receives requests with the model's input data and output the wine quality prediction. Again, the goal is not to focus on the ML Model quality, but on the architecture around supporting it.
 
 In order to support this API and the overall DevOps cycle the following architecture was developed:
 
@@ -58,39 +58,61 @@ The above command will:
 - Execute the command `scripts/shell/update_env.sh` that will create the `.env` file based on `.env.sample` file but with the newly created `AZURE_STORAGE_CONNECTION_STRING` environment variable.
     - If you don't want to execute the `.sh` script, please get the connection string variable from the newly created Storage Account  (check [here](https://youtu.be/x2A0i8OMheA?si=mgYngRX5qAXh_kFI&t=74) for a tutorial), replace it in the `.env.sample` file and rename it to `.env`. It will be used by the docker-compose services.
 
+4 - When you're done testing the services, you can delete all cloud resources with `make destroy-infra`
+
 ------------------------------------------------------------------------------------------------
 **Observation**: In case you want to SSH the VM from your local computer, execute the following steps **from the same terminal you used to execute the terraform scripts**:
     * `terraform output -raw private_key_pem > <local_folder>` - This will export the private key needed to access the VM into your local folder
     * `ssh -i ~/.ssh/id_rsa.pem azureuser@$(terraform output -raw vm_public_ip_address)`. If it doesn't work, confirm if the VM's public IP in Azure Portal is correct with what terraform outputs with `terraform output -raw vm_public_ip_address`. In case it's not, replace the command by the correct IP.
 
 --------------------------------
-## Local docker-compose services
 
-**Before you run it locally**, you should pay attention to the `DATA_TIMEZONE` variable in the `.env` file, as leaving it to *JAPAN* might lead to your data not being show in Grafana in your timezone.
+## Local scripts to interact with services
 
-You can also run the services offline, in your computer. For that, run `make docker-up` from the ` project root` folder to build and run the services.
-
-## Offline Scripts
-
-For the sake of testing the project, there are 3 scripts that simulates scripts running outside from the VM, that would be executed by the ML Engineer or Data Scientist, **after the VM docker-compose setup is completed**:
+For the sake of testing the project, there are 3 scripts that simulates scripts running outside from the VM, that would be executed by the ML Engineer or Data Scientist, **after the VM docker-compose setup is completed**. I also recommend creating a virtual environment using the `./requirements.txt` file.
 
 - Folder `scripts`: Contains the scripts used to train and register the models using MLFlow and to simulate real-time data being sent to the service.
     - Running `modelling_scripts/training.py` will train the data on a Regression Tree, test 100 models and track their performance and hiperparameters into MLFlow. You'll be able to check MLFlow UI by the URL indicated in the `MLFLOW_TRACKING_URL` variable in `.env` file.
     - The script `modelling_scripts/register_model.py` will then select the best model among those and register it into MLFlow registry.
-    - The script `modelling_scripts/real_data_simulator.py` simulates data being sent to the prediction_service in an unregular interval, in order to see the metrics arriving and being displayed in Grafana. The prediction service will make the predictions, prometheus will scrape them and grafana will make those metrics available in the URL `http://127.0.0.1:3000`.
+    - The script `modelling_scripts/real_data_simulator.py` simulates data being sent to the prediction_service in an unregular interval, in order to see the metrics arriving and being displayed in Grafana.
+
+## Accessing services front-end
+
+Depending on whether you're running the services in the remote VM or locally (check [local-docker-compose-services](#local-docker-compose-services)), the endpoints's host will be the local address or the VM's public IP address. In case the addresses `127.0.0.1` don't work when typing in the browser, try changing them to `locahost` instead.
+
+Initially, the following endpoints will be available when the services are up:
+
+| Service    | Local                   | Remote                           | Other
+|------------|-------------------------|----------------------------------|------------|
+| Adminer    | http://127.0.0.1:8080   | http://\<VM-public-ip\>:8080     |                        |
+| Prometheus | http://127.0.0.1:9090   | http://\<VM-public-ip\>:9090     |                        |
+| Grafana    | http://127.0.0.1:3000   | http://\<VM-public-ip\>:3000     | user: admin pass:admin |
+| MLFlow     | http://127.0.0.1:5001   | http://\<VM-public-ip\>:5001     |                        |
+
+## Local docker-compose services
+
+You can also run all the services locally and use the `local scripts` to interact with them.
+
+**Before you run it locally**, you should pay attention to:
+    * If you don't have the file `.env`, copy the `.env.sample` and rename it to `.env`, as the services will depend on those variables to run. Besides **change the variable REMOTE_MLFLOW_STORAGE to false**, so the MLFLow knows where to send the tracking data.
+    * Change the `DATA_TIMEZONE` variable in the `.env` file to your timezone, as leaving it to *JAPAN* might lead to your data not being show in Grafana in your timezone.
+
+Finally, run `make docker-up` **from the project root folder** to build and run the services and execute the any of the local scripts.
+    * Makefile assumes dockerV2, *i.e.*, it's calling `docker compose` (without hifen) instead of `docker-compose`(with hifen). Change accordingly, if needed.
 
 # Best practices
 
 1. Unit tests were developed for the prediction service and are available at `prediction_service/tests/`.
 2. Integration test was developed to test the overall request and API response and is available also at `prediction_service/tests/`.
 3. Linter and black code-formatter are set as pre-commit hooks. Pre-commit hooks configuration is available at `.pre-commit-config.yaml`.
-4. No makefile is provided.
+4. Makefile is provided to setup and delete infra and to setup and delete docker-compose services
 5. Pre-commit hooks are available and configured at `.pre-commit-config.yaml`.
-6. **CI/CD PIPELINE**
+6. Only CI pipeline is developed at `.github/ci-main.yml` that is triggered when there's a pull request into the main branch. CD pipeline will be developed in future iterations.
 
+# Things to improve
 
-
-
-
-
-scp -i ~/.ssh/id_rsa.pem docker-compose.yml azureuser@4.215.207.30:/home/azureuser/mlops_zoomcamp_finalproject3/docker-compose.yml
+* Centralize password, keys, and secrets management to Azure Vault. For now, only github actions for CI pipeline is importing the secrets from key vault but I'd like to make it a standard for the services as well that, for now, rely on the `.env` variable.
+* For now, there's no CD pipeline, so I'd like to integrate it when I have more time.
+* I'm centralizing all services into one VM with docker-compose. I'd like to use separate docker containers in Azure with ACR (Azure Container Registry) and ACS (Azure Container Services) to have a better management of resources and cost saving.
+* Unit tests covered only a part the `prediction_service` code. I'd like to improve them and make them better quality.
+* There's some duplicated code regarding `utils` functions. I'd like to make that a package for easier maintanance.

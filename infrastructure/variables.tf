@@ -29,6 +29,23 @@ variable "cloud_config_file_path" {
   default     = "cloud-config.yaml"
 }
 
+variable "azurerm_storage_account_name" {
+  description = "The name of the storage account"
+  type        = string
+
+  default     = "mlopsproject3091"
+}
+
+variable "azurerm_storage_container_name" {
+  description = "The name of the storage account container used by the VM for MLFlow"
+  type        = string
+
+  default     = "mlflow-container"
+}
+
+# Below are the variables to run in docker-compose.
+# This is just for the projects reproducibility sake.
+# Change it in case you change .env variables
 variable "key-vault-secrets" {
   type = map(string)
   default = {
