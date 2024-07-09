@@ -32,6 +32,7 @@ perl -i -pe 's/^#AZURE_STORAGE_CONNECTION_STRING=.*$/AZURE_STORAGE_CONNECTION_ST
 perl -i -pe 's/^#?AZURE_STORAGE_ACCOUNT_NAME=.*$/AZURE_STORAGE_ACCOUNT_NAME="'"$(printf '%s\n' "$storage_account_name" | sed 's/[\/&]/\\&/g')"'"/' ../.env
 perl -i -pe 's/^#?AZURE_STORAGE_CONTAINER_NAME=.*$/AZURE_STORAGE_CONTAINER_NAME="'"$(printf '%s\n' "$storage_container_name" | sed 's/[\/&]/\\&/g')"'"/' ../.env
 perl -i -pe 's/^#?MLFLOW_REMOTE_TRACKING_URL=.*$/MLFLOW_REMOTE_TRACKING_URL="http:\/\/'"$(printf '%s\n' "$vm_public_ip_address" | sed 's/[\/&]/\\&/g')"':5001"/' ../.env
+perl -i -pe 's/^#?PREDICTION_SERVICE_REMOTE_URL=.*$/PREDICTION_SERVICE_REMOTE_URL="http:\/\/'"$(printf '%s\n' "$vm_public_ip_address" | sed 's/[\/&]/\\&/g')"':9696"/' ../.env
 
 
 # Function to check if a variable is set correctly in the .env file
@@ -55,6 +56,7 @@ check_variable "AZURE_STORAGE_CONNECTION_STRING" "$connection_string" || failed=
 check_variable "AZURE_STORAGE_ACCOUNT_NAME" "$storage_account_name" || failed=1
 check_variable "AZURE_STORAGE_CONTAINER_NAME" "$storage_container_name" || failed=1
 check_variable "MLFLOW_REMOTE_TRACKING_URL" "http://$vm_public_ip_address:5001" || failed=1
+check_variable "PREDICTION_SERVICE_REMOTE_URL" "http://$vm_public_ip_address:9696" || failed=1
 
 # Final status
 if [ $failed -eq 0 ]; then

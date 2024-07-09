@@ -36,14 +36,22 @@ POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "127.0.0.1")
 POSTGRES_TABLE = os.environ.get("POSTGRES_TABLE", "wine_quality")
 url = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:5432/{POSTGRES_DB}"
 ENGINE = create_engine(f"{url}")
+print("--- Loaded POSTGRES credentials and SQL engine")
 
 # PREDICTION SERVICE DATA
-PREDICTION_SERVICE_URL = os.environ.get(
-    "PREDICTION_SERVICE_URL", "http://127.0.0.1:9696"
+IS_SERVICE_REMOTE = os.environ.get("IS_SERVICE_REMOTE", "false")
+if IS_SERVICE_REMOTE == "true":
+    PREDICTION_SERVICE_URL = os.environ.get("PREDICTION_SERVICE_REMOTE_URL")
+else:
+    PREDICTION_SERVICE_URL = os.environ.get("PREDICTION_SERVICE_LOCAL_URL")
+print(
+    f"--- IS_SERVICE_REMOTE set to {IS_SERVICE_REMOTE}. \
+      Loaded PREDICTION_SERVICE_URL: {PREDICTION_SERVICE_URL}"
 )
 
 # DATA TIMEZONE
 DATA_TIMEZONE = os.environ.get("DATA_TIMEZONE", "Japan")
+print("--- Simulation data is set to JAPAN timezone")
 
 
 def recreate_empty_table() -> None:
@@ -114,6 +122,7 @@ def main(X: pd.DataFrame, y: pd.DataFrame):
         y (pd.DataFrame): The targets of the dataset.
     """
     index = 0
+    print("Sending data to Prediction Service...")
     while index < X.shape[0]:  # while all rows haven't been processed
 
         df_row = X.iloc[index].copy()  # get one row of data
@@ -136,8 +145,8 @@ def main(X: pd.DataFrame, y: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    # logging.info("Waiting of the database to start...")
-    time.sleep(10)  # wait for the database to start
+    print("Acquiring dataset...")
     X_, y_ = get_dataset_ucirepo(repo_id=186)  # get wine dataset
+    print("Recreating empty table...")
     recreate_empty_table()  # recreate the table in the database
     main(X_, y_)

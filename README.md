@@ -85,17 +85,18 @@ Initially, the following endpoints will be available when the services are up:
 
 | Service    | Local                   | Remote                           | Other
 |------------|-------------------------|----------------------------------|------------|
-| Adminer    | http://127.0.0.1:8080   | http://\<VM-public-ip\>:8080     |                        |
+| Prediction Service | http://127.0.0.1:9696   | http://\<VM-public-ip\>:9696     |                        |
 | Prometheus | http://127.0.0.1:9090   | http://\<VM-public-ip\>:9090     |                        |
-| Grafana    | http://127.0.0.1:3000   | http://\<VM-public-ip\>:3000     | user: admin pass:admin |
+| Adminer    | http://127.0.0.1:8080   | http://\<VM-public-ip\>:8080     |                        |
 | MLFlow     | http://127.0.0.1:5001   | http://\<VM-public-ip\>:5001     |                        |
+| Grafana    | http://127.0.0.1:3000   | http://\<VM-public-ip\>:3000     | user: admin pass:admin |
 
 ## Local docker-compose services
 
 You can also run all the services locally and use the `local scripts` to interact with them.
 
 **Before you run it locally**, you should pay attention to:
-    * If you don't have the file `.env`, copy the `.env.sample` and rename it to `.env`, as the services will depend on those variables to run. Besides **change the variable IS_MLFLOW_REMOTE_STORAGE and IS_MLFLOW_REMOTE_SERVER to false**, so the MLFLow knows where process the data locally and store it in a temporary folder inside the container.
+    * If you don't have the file `.env`, copy the `.env.sample` and rename it to `.env`, as the services will depend on those variables to run. Besides **change the variable IS_MLFLOW_REMOTE_STORAGE and IS_SERVICE_REMOTE to false**, so the MLFLow knows where process the data locally and store it in a temporary folder inside the container.
     * Change the `DATA_TIMEZONE` variable in the `.env` file to your timezone, as leaving it to *JAPAN* might lead to your data not being show in Grafana in your timezone.
 
 Finally, run `make docker-up` **from the project root folder** to build and run the services and execute the any of the local scripts.

@@ -25,14 +25,14 @@ MLFLOW_EXPERIMENT_NAME = os.environ.get(
     "MLFLOW_EXPERIMENT_NAME", "wine_quality_hyperparameter_optimization"
 )
 
-IS_MLFLOW_REMOTE_SERVER = os.environ.get("IS_MLFLOW_REMOTE_SERVER", "false")
-if IS_MLFLOW_REMOTE_SERVER == "true":
+IS_SERVICE_REMOTE = os.environ.get("IS_SERVICE_REMOTE", "false")
+if IS_SERVICE_REMOTE == "true":
     MLFLOW_TRACKING_URL = os.environ.get("MLFLOW_REMOTE_TRACKING_URL")
 else:
     MLFLOW_TRACKING_URL = os.environ.get("MLFLOW_LOCAL_TRACKING_URL")
 print(f"--- Loaded MLFLOW_EXPERIMENT_NAME: {MLFLOW_EXPERIMENT_NAME}")
 print(
-    f"--- IS_MLFLOW_REMOTE_SERVER set to {IS_MLFLOW_REMOTE_SERVER}. \
+    f"--- IS_SERVICE_REMOTE set to {IS_SERVICE_REMOTE}. \
       Loaded MLFLOW_TRACKING_URL: {MLFLOW_TRACKING_URL}"
 )
 
